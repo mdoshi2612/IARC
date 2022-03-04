@@ -61,7 +61,7 @@ def get_output(file_name):
   
   cap=cv2.VideoCapture(file_name)
   size = (int(cap.get(3)),int(cap.get(4)))
-  writer = cv2.VideoWriter('result_thresh_30%.avi', 
+  writer = cv2.VideoWriter('./Results/result_thresh_30%.avi', 
                          cv2.VideoWriter_fourcc(*'MJPG'),
                          30, size)
 
@@ -95,5 +95,5 @@ board = yolo()
 
 #image = cv2.imread('test2.png')
 #draw_box(image)
-results = get_output('vid.mp4')
-results.to_csv('results_thresh_30%.csv', index = False)
+results = get_output('./Video and Image Extractor/vid.mp4')
+results.to_csv('./Results/results_thresh_30%.csv', index = False)
