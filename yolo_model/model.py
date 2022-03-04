@@ -1,10 +1,7 @@
 from tool.darknet2pytorch import Darknet
 from tool.torch_utils import *
 import cv2
-import pandas as pd 
-
-
-
+import pandas as pd
 
 def yolo():
     board=Darknet(config_file_path,inference=True)
@@ -27,24 +24,6 @@ def my_detect(m,cv_img):
     x2 = int(box[2] * w)
     y2 = int(box[3] * h)
     return [True,x1,y1,x2,y2]
-
-
-def my_detect(m,cv_img):
-    use_cuda=True
-    img=cv2.resize(cv_img, (m.width, m.height))
-    img=cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    boxes = do_detect(m, img, 0.2, 0.6, use_cuda)
-    if len(boxes[0])==0:
-        return [False,0,0,0,0,-1]
-    box=boxes[0][0]
-    h,w,c=cv_img.shape
-    x1 = int(box[0] * w)
-    y1 = int(box[1] * h)
-    x2 = int(box[2] * w)
-    y2 = int(box[3] * h)
-    score = box[4]
-    return [True,x1,y1,x2,y2,score]
-
 
 def draw_box(image):
     ret, x1,y1,x2,y2,score = my_detect(board, image)
@@ -91,7 +70,7 @@ def get_output(file_name):
       
       row = {'Frame':n, 'Detected':is_detected ,'x1': x1, 'y1': y1, 'x2': x2, 'y2': y2, 'Score':score}
       df = df.append(row, ignore_index = True)
-      if is_detected and score > 0.3 :
+      if is_detected:
           draw_box(frame)
       writer.write(frame)
       n+=1
