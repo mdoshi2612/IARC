@@ -291,13 +291,18 @@ if __name__ == '__main__':
     mot_tracker = Sort(max_age=args.max_age, 
                        min_hits=args.min_hits,
                        iou_threshold=args.iou_threshold) #create instance of the SORT tracker
+
     seq_dets = np.loadtxt(seq_dets_fn, delimiter=',')
     seq = seq_dets_fn[pattern.find('*'):].split(os.path.sep)[0]
-    
+
     with open(os.path.join('output', '%s.txt'%(seq)),'w') as out_file:
       print("Processing %s."%(seq))
       for frame in range(int(seq_dets[:,0].max())):
         frame += 1 #detection and frame numbers begin at 1
+        if(seq_dets[seq_dets[:, 0]==frame, 10] == 0):
+          is_empty = True
+        else:
+          is_empty = False
         dets = seq_dets[seq_dets[:, 0]==frame, 2:7]
         dets[:, 2:4] += dets[:, 0:2] #convert to [x1,y1,w,h] to [x1,y1,x2,y2]
         total_frames += 1
@@ -309,6 +314,9 @@ if __name__ == '__main__':
           plt.title(seq + ' Tracked Targets')
 
         start_time = time.time()
+        if is_empty:
+          dets = np.empty((0, 5))
+          print(f"Frame {frame} has empty detection")
         trackers = mot_tracker.update(dets)
         cycle_time = time.time() - start_time
         total_time += cycle_time
