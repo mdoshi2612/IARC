@@ -2,8 +2,8 @@ output/
 mot_benchmark
 sort_env/
 data/
-yolo_model/custom-yolov4-detector_4000.weights
-yolo_model/custom-yolov4-detector.cfg
+*.weights
+*.cfg
 *.avi
 *.mp4
 *.csv
