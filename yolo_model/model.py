@@ -1,0 +1,99 @@
+from tool.darknet2pytorch import Darknet
+from tool.torch_utils import *
+import cv2
+
+config_file_path = './custom-yolov4-tiny-detector.cfg'
+weight_file_path = './custom-yolov4-tiny-detector_best.weights'
+
+def yolo():
+    board=Darknet(config_file_path,inference=True)
+    board.load_weights(weight_file_path)
+    board.cuda()
+    return board
+
+
+def my_detect(m,cv_img):
+    use_cuda=True
+    img=cv2.resize(cv_img, (m.width, m.height))
+    img=cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    boxes = do_detect(m, img, 0.2, 0.6, use_cuda)
+    if len(boxes[0])==0:
+        return [False,0,0,0,0]
+    box=boxes[0][0]
+    h,w,c=cv_img.shape
+    x1 = int(box[0] * w)
+    y1 = int(box[1] * h)
+    x2 = int(box[2] * w)
+    y2 = int(box[3] * h)
+    return [True,x1,y1,x2,y2]
+
+
+def my_detect(m,cv_img):
+    use_cuda=True
+    img=cv2.resize(cv_img, (m.width, m.height))
+    img=cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    boxes = do_detect(m, img, 0.2, 0.6, use_cuda)
+    if len(boxes[0])==0:
+        return [False,0,0,0,0]
+    box=boxes[0][0]
+    h,w,c=cv_img.shape
+    x1 = int(box[0] * w)
+    y1 = int(box[1] * h)
+    x2 = int(box[2] * w)
+    y2 = int(box[3] * h)
+    score = box[4]
+    return [True,x1,y1,x2,y2,score]
+
+
+def draw_box(image):
+    ret, x1,y1,x2,y2,score = my_detect(board, image)
+    boxes = [ret, x1,y1,x2,y2,score]
+    score = str(boxes[5])
+    print(boxes)
+    image=cv2.rectangle(image,(x1,y1),(x2,y2),(255,0,0),3)
+ 
+    # For the text background
+    # Finds space required by the text so that we can put a background with that amount of width.
+    (w, h), _ = cv2.getTextSize(
+            f'Mast:{score}', cv2.FONT_HERSHEY_SIMPLEX, 0.6, 1)
+
+    # Prints the text.    
+    image = cv2.rectangle(image, (x1, y1 - 20), (x1 + w, y1), (255,0,0), -1)
+    image = cv2.putText(image, f'Mast:{score}', (x1, y1 - 5),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255,255,255), 1)
+
+    # For printing text
+    image=cv2.resize(image,(512,512))
+    cv2.imshow('image',image)
+    while True:
+        if cv2.waitKey(0) & 0xFF == ord('q'):
+            break
+
+
+def get_output(file_name):
+  
+  cap=cv2.VideoCapture(file_name)
+  size = (int(cap.get(3)),int(cap.get(4)))
+  writer = cv2.VideoWriter('result.avi', 
+                         cv2.VideoWriter_fourcc(*'MJPG'),
+                         10, size)
+                         
+  
+  while True :
+      ret,frame=cap.read()
+      if not ret:
+        break
+      is_detected=my_detect(board,frame)[0]
+      n+=1
+      if is_detected:
+          draw_box(frame)
+      writer.write(frame)
+
+  # print(n/t)
+  writer.release()
+
+
+board = yolo()
+
+image = cv2.imread('test.png')
+get_output()
