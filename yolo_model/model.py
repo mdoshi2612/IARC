@@ -2,8 +2,8 @@ from tool.darknet2pytorch import Darknet
 from tool.torch_utils import *
 import cv2
 
-config_file_path = './custom-yolov4-tiny-detector.cfg'
-weight_file_path = './custom-yolov4-tiny-detector_best.weights'
+config_file_path = './custom-yolov4-detector.cfg'
+weight_file_path = './custom-yolov4-detector_4000.weights'
 
 def yolo():
     board=Darknet(config_file_path,inference=True)
@@ -48,7 +48,7 @@ def my_detect(m,cv_img):
 def draw_box(image):
     ret, x1,y1,x2,y2,score = my_detect(board, image)
     boxes = [ret, x1,y1,x2,y2,score]
-    score = str(boxes[5])
+    score = str(round(boxes[5],2))
     print(boxes)
     image=cv2.rectangle(image,(x1,y1),(x2,y2),(255,0,0),3)
  
@@ -96,4 +96,6 @@ def get_output(file_name):
 board = yolo()
 
 image = cv2.imread('test.png')
-get_output()
+draw_box(image)
+""" get_output()
+ """
