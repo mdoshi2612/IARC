@@ -1,9 +1,10 @@
 from tool.darknet2pytorch import Darknet
 from tool.torch_utils import *
 import cv2
+import pandas as pd 
 
-config_file_path = './custom-yolov4-detector.cfg'
-weight_file_path = './custom-yolov4-detector_4000.weights'
+
+
 
 def yolo():
     board=Darknet(config_file_path,inference=True)
@@ -16,7 +17,7 @@ def my_detect(m,cv_img):
     use_cuda=True
     img=cv2.resize(cv_img, (m.width, m.height))
     img=cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    boxes = do_detect(m, img, 0.2, 0.6, use_cuda)
+    boxes = do_detect(m, img, 0.3, 0.6, use_cuda)
     if len(boxes[0])==0:
         return [False,0,0,0,0]
     box=boxes[0][0]
@@ -34,7 +35,7 @@ def my_detect(m,cv_img):
     img=cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     boxes = do_detect(m, img, 0.2, 0.6, use_cuda)
     if len(boxes[0])==0:
-        return [False,0,0,0,0]
+        return [False,0,0,0,0,-1]
     box=boxes[0][0]
     h,w,c=cv_img.shape
     x1 = int(box[0] * w)
@@ -64,38 +65,52 @@ def draw_box(image):
 
     # For printing text
     image=cv2.resize(image,(512,512))
-    cv2.imshow('image',image)
-    while True:
-        if cv2.waitKey(0) & 0xFF == ord('q'):
-            break
+#    cv2.imshow('image',image)
+#    while True:
+#        if cv2.waitKey(0) & 0xFF == ord('q'):
+#            break
 
 
 def get_output(file_name):
+
+  column_names = ['Frame','Detected', 'x1', 'y1', 'x2', 'y2', 'Score']
+  df = pd.DataFrame(columns = column_names)
   
   cap=cv2.VideoCapture(file_name)
   size = (int(cap.get(3)),int(cap.get(4)))
-  writer = cv2.VideoWriter('result.avi', 
+  writer = cv2.VideoWriter('result_thresh_30%.avi', 
                          cv2.VideoWriter_fourcc(*'MJPG'),
-                         10, size)
-                         
-  
+                         30, size)
+
+  n = 0
   while True :
       ret,frame=cap.read()
       if not ret:
         break
-      is_detected=my_detect(board,frame)[0]
-      n+=1
-      if is_detected:
+      is_detected, x1, y1, x2, y2, score=my_detect(board,frame)
+      
+      row = {'Frame':n, 'Detected':is_detected ,'x1': x1, 'y1': y1, 'x2': x2, 'y2': y2, 'Score':score}
+      df = df.append(row, ignore_index = True)
+      if is_detected and score > 0.3 :
           draw_box(frame)
       writer.write(frame)
+      n+=1
 
   # print(n/t)
   writer.release()
+  return df
+
+
+
+config_file_path = './custom-yolov4-detector.cfg'
+weight_file_path = './custom-yolov4-detector_4000.weights'
 
 
 board = yolo()
 
-image = cv2.imread('test.png')
-draw_box(image)
-""" get_output()
- """
+
+
+#image = cv2.imread('test2.png')
+#draw_box(image)
+results = get_output('vid.mp4')
+results.to_csv('results_thresh_30%.csv', index = False)
