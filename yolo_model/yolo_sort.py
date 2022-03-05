@@ -291,6 +291,9 @@ if __name__ == '__main__':
 #      break
 
   cap = cv2.VideoCapture("./Video and Image Extractor/vid.mp4")
+  writer = cv2.VideoWriter('./Results/Sort_Yolo.mp4', 
+                         cv2.VideoWriter_fourcc(*'mp4v'),
+                         30, (1920,1080))
   mot_tracker = Sort() #create instance of the SORT tracker
 
   n = 0
@@ -311,6 +314,7 @@ if __name__ == '__main__':
           x1,y1,x2,y2 = trackers[0][0:4]
           cv2.rectangle(frame, (x1,y1), (x2,y2), (255,0,0))
         
+        writer.write(frame)
         cv2.imshow("Video", frame)
         
         if cv2.waitKey(25) & 0xFF == ord('q'):
@@ -319,5 +323,6 @@ if __name__ == '__main__':
         break
   
 # Release all space and windows once done
+  writer.release()
   cap.release()
   cv2.destroyAllWindows()
