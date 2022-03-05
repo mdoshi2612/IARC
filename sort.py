@@ -317,6 +317,7 @@ if __name__ == '__main__':
         if is_empty:
           dets = np.empty((0, 5))
           print(f"Frame {frame} has empty detection")
+        print(dets.shape)
         trackers = mot_tracker.update(dets)
         cycle_time = time.time() - start_time
         total_time += cycle_time

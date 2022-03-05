@@ -23,29 +23,31 @@ def my_detect(m,cv_img):
     x2 = int(box[2] * w)
     y2 = int(box[3] * h)
     score = box[4]
-    return [True,x1,y1,x2,y2,score]
+    return np.asarray([True,x1,y1,x2,y2,score])
 
 
 def draw_box(board,image):
+    
     ret, x1,y1,x2,y2,score = my_detect(board, image)
-    boxes = [ret, x1,y1,x2,y2,score]
-    score = str(round(boxes[5],2))
-    print(boxes)
-    image=cv2.rectangle(image,(x1,y1),(x2,y2),(255,0,0),3)
- 
-    # For the text background
-    # Finds space required by the text so that we can put a background with that amount of width.
-    (w, h), _ = cv2.getTextSize(
-            f'Mast:{score}', cv2.FONT_HERSHEY_SIMPLEX, 0.6, 1)
+    if ret == True:
+        boxes = [ret, x1,y1,x2,y2,score]
+        score = str(round(boxes[5],2))
+        print(boxes)
+        image=cv2.rectangle(image,(x1,y1),(x2,y2),(255,0,0),3)
+    
+        # For the text background
+        # Finds space required by the text so that we can put a background with that amount of width.
+        (w, h), _ = cv2.getTextSize(
+                f'Mast:{score}', cv2.FONT_HERSHEY_SIMPLEX, 0.6, 1)
 
-    # Prints the text.    
-    image = cv2.rectangle(image, (x1, y1 - 20), (x1 + w, y1), (255,0,0), -1)
-    image = cv2.putText(image, f'Mast:{score}', (x1, y1 - 5),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255,255,255), 1)
+        # Prints the text.    
+        image = cv2.rectangle(image, (x1, y1 - 20), (x1 + w, y1), (255,0,0), -1)
+        image = cv2.putText(image, f'Mast:{score}', (x1, y1 - 5),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255,255,255), 1)
 
-    # For printing text
+        # For printing text
     image=cv2.resize(image,(512,512))
-#    cv2.imshow('image',image)
+    #    cv2.imshow('image',image)
 #    while True:
 #        if cv2.waitKey(0) & 0xFF == ord('q'):
 #            break

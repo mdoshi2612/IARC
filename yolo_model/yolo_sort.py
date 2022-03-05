@@ -291,12 +291,28 @@ if __name__ == '__main__':
 #      break
 
   cap = cv2.VideoCapture("./Video and Image Extractor/vid.mp4")
+  mot_tracker = Sort() #create instance of the SORT tracker
 
+  n = 0
   while True:
     ret, frame = cap.read()
     if ret:
         # if video is still left 
+        # model.draw_box(board, frame)
+        dets = model.my_detect(board, frame)
+        n+=1
+        dets = np.asarray(dets)
+        bbox_array = dets[1:6].reshape((1,5))
+        if dets[0] == False:
+          bbox_array = np.empty((0, 5))
+        trackers = mot_tracker.update(bbox_array).astype(int)
+        print(n, trackers.size == 0)
+        if trackers.size != 0:
+          x1,y1,x2,y2 = trackers[0][0:4]
+          cv2.rectangle(frame, (x1,y1), (x2,y2), (255,0,0))
+        
         cv2.imshow("Video", frame)
+        
         if cv2.waitKey(25) & 0xFF == ord('q'):
           break
     else:
