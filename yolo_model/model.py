@@ -1,12 +1,9 @@
 from tool.darknet2pytorch import Darknet
 from tool.torch_utils import *
 import cv2
-import pandas as pd 
+import pandas as pd
 
-
-
-
-def yolo():
+def yolo(config_file_path, weight_file_path):
     board=Darknet(config_file_path,inference=True)
     board.load_weights(weight_file_path)
     board.cuda()
@@ -29,7 +26,7 @@ def my_detect(m,cv_img):
     return [True,x1,y1,x2,y2,score]
 
 
-def draw_box(image):
+def draw_box(board,image):
     ret, x1,y1,x2,y2,score = my_detect(board, image)
     boxes = [ret, x1,y1,x2,y2,score]
     score = str(round(boxes[5],2))
@@ -75,7 +72,7 @@ def get_output(file_name):
       row = {'Frame':n, 'Detected':is_detected ,'x1': x1, 'y1': y1, 'x2': x2, 'y2': y2, 'Score':score}
       df = df.append(row, ignore_index = True)
       if is_detected:
-          draw_box(frame)
+          draw_box(board,frame)
       writer.write(frame)
       n+=1
 
@@ -85,15 +82,16 @@ def get_output(file_name):
 
 
 
-config_file_path = './custom-yolov4-detector.cfg'
-weight_file_path = './custom-yolov4-detector_4000.weights'
+if __name__ == '__main__':
+    config_file_path = './custom-yolov4-detector.cfg'
+    weight_file_path = './custom-yolov4-detector_4000.weights'
 
 
-board = yolo()
+    board = yolo(config_file_path, weight_file_path)
 
 
 
-#image = cv2.imread('test2.png')
-#draw_box(image)
-results = get_output('./Video and Image Extractor/vid.mp4')
-results.to_csv('./Results/results_thresh_30%.csv', index = False)
+    #image = cv2.imread('test2.png')
+    #draw_box(image)
+    results = get_output('./Video and Image Extractor/vid.mp4')
+    results.to_csv('./Results/results_thresh_30%.csv', index = False)
