@@ -18,6 +18,7 @@
 from __future__ import print_function
 
 import os
+import pandas as pd
 import numpy as np
 import matplotlib
 matplotlib.use('TkAgg')
@@ -278,7 +279,7 @@ if __name__ == '__main__':
   total_frames = 0
   colours = np.random.rand(32, 3) #used only for display
 
-  board = model.yolo(config_file_path = './custom-yolov4-detector.cfg', weight_file_path = './custom-yolov4-detector_4000.weights')
+  board = model.yolo(config_file_path = './custom-yolov4-tiny-detector.cfg', weight_file_path = './custom-yolov4-tiny-detector_last.weights')
 
 
 # Displaying a basic test image
@@ -290,8 +291,12 @@ if __name__ == '__main__':
 #    if cv2.waitKey(0) == ord('q'):
 #      break
 
-  cap = cv2.VideoCapture("./Video and Image Extractor/vid.mp4")
-  writer = cv2.VideoWriter('./Results/Sort_Yolo.mp4', 
+
+  column_names = ['Frame','Detected', 'x1', 'y1', 'x2', 'y2', 'Score']
+  df = pd.DataFrame(columns = column_names)
+
+  cap = cv2.VideoCapture("./Video Testing/Testing_0_1st_ April_ 22/Original_video/vid.mp4")
+  writer = cv2.VideoWriter('./Video Testing/Testing_0_1st_ April_ 22/Results/YOLOv4_tiny_and_SORT/result.mp4', 
                          cv2.VideoWriter_fourcc(*'mp4v'),
                          30, (1920,1080))
   mot_tracker = Sort() #create instance of the SORT tracker
@@ -313,6 +318,8 @@ if __name__ == '__main__':
         if trackers.size != 0:
           x1,y1,x2,y2 = trackers[0][0:4]
           cv2.rectangle(frame, (x1,y1), (x2,y2), (255,0,0))
+          row = {'Frame':n,'x1': x1, 'y1': y1, 'x2': x2, 'y2': y2}
+          df = df.append(row, ignore_index = True)
         
         writer.write(frame)
         cv2.imshow("Video", frame)
@@ -323,6 +330,7 @@ if __name__ == '__main__':
         break
   
 # Release all space and windows once done
+  df.to_csv('./Video Testing/Testing_0_1st_ April_ 22/Results/YOLOv4_tiny_and_SORT/bbox.csv', index = False)
   writer.release()
   cap.release()
   cv2.destroyAllWindows()
