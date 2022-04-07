@@ -268,45 +268,40 @@ def parse_args():
                         help="Minimum number of associated detections before track is initialised.", 
                         type=int, default=3)
     parser.add_argument("--iou_threshold", help="Minimum IOU for match.", type=float, default=0.3)
+    parser.add_argument("--tiny", type = bool, default = False)
     args = parser.parse_args()
     return args
 
 if __name__ == '__main__':
-  # all train
   args = parse_args()
   phase = args.phase
+  tiny = args.tiny
   total_time = 0.0
   total_frames = 0
-  colours = np.random.rand(32, 3) #used only for display
+  colours = np.random.rand(32, 3)
 
-  board = model.yolo(config_file_path = './custom-yolov4-tiny-detector.cfg', weight_file_path = './custom-yolov4-tiny-detector_last.weights')
-
-
-# Displaying a basic test image
-
-#  while True:
-#    detection = model.my_detect(board,image)
-#    model.draw_box(board,image)
-#    cv2.imshow("Image", image)
-#    if cv2.waitKey(0) == ord('q'):
-#      break
-
-
+  if(tiny):
+    board = model.yolo(config_file_path = './custom-yolov4-tiny-detector.cfg', weight_file_path = './custom-yolov4-tiny-detector_last.weights')
+  else:
+    board = model.yolo(config_file_path = './custom-yolov4-detector.cfg', weight_file_path = './custom-yolov4-detector_4000.weights')
   column_names = ['Frame','Detected', 'x1', 'y1', 'x2', 'y2', 'Score']
   df = pd.DataFrame(columns = column_names)
 
-  cap = cv2.VideoCapture("./Video Testing/Testing_0_1st_ April_ 22/Original_video/vid.mp4")
-  writer = cv2.VideoWriter('./Video Testing/Testing_0_1st_ April_ 22/Results/YOLOv4_tiny_and_SORT/result.mp4', 
+  cap = cv2.VideoCapture("./Video Testing/Testing_5_3rd_April_22/Original_video/vid.avi")
+  if(tiny):
+    writer = cv2.VideoWriter('./Video Testing/Testing_5_3rd_April_22/Results/YOLOv4_tiny_and_SORT/result.mp4', 
                          cv2.VideoWriter_fourcc(*'mp4v'),
                          30, (1920,1080))
-  mot_tracker = Sort() #create instance of the SORT tracker
-
+  else:
+    writer = cv2.VideoWriter('./Video Testing/Testing_5_3rd_April_22/Results/YOLOv4_and_SORT/result.mp4', 
+                         cv2.VideoWriter_fourcc(*'mp4v'),
+                         30, (1920,1080))
+  
+  mot_tracker = Sort()
   n = 0
   while True:
     ret, frame = cap.read()
     if ret:
-        # if video is still left 
-        # model.draw_box(board, frame)
         dets = model.my_detect(board, frame)
         n+=1
         dets = np.asarray(dets)
@@ -328,9 +323,11 @@ if __name__ == '__main__':
           break
     else:
         break
-  
-# Release all space and windows once done
-  df.to_csv('./Video Testing/Testing_0_1st_ April_ 22/Results/YOLOv4_tiny_and_SORT/bbox.csv', index = False)
+
+  if(tiny):
+    df.to_csv('./Video Testing/Testing_5_3rd_April_22/Results/YOLOv4_tiny_and_SORT/bbox.csv', index = False)
+  else:
+    df.to_csv('./Video Testing/Testing_5_3rd_April_22/Results/YOLOv4_and_SORT/bbox.csv', index = False)
   writer.release()
   cap.release()
   cv2.destroyAllWindows()
