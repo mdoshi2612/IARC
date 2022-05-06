@@ -3,7 +3,6 @@ mot_benchmark
 sort_env/
 data/
 *.weights
-*.cfg
 *.avi
 *.mp4
 *.csv
