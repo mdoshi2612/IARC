@@ -1,3 +1,4 @@
+.gitignore
 output/
 mot_benchmark
 sort_env/
