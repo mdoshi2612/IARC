@@ -1,0 +1,10 @@
+output/
+mot_benchmark
+sort_env/
+data/
+*.weights
+*.avi
+*.mp4
+*.csv
+*.jpg
+*.png
